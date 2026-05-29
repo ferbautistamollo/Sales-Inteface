@@ -3,8 +3,8 @@ export const proxy = async () => {
   // const cookieStore = await cookies();
   // const cookie = cookieStore.get("msp");
   // const token = cookie?.value;
-  // const host = process.env.NEXT_PUBLIC_SERVER_FRONTEND || "";
-  // const port = process.env.LOGIN_FRONTEND_PORT || "3001";
+  // const host = process.env.NEXT_PUBLIC_FRONTEND_HOST || "";
+  // const port = process.env.NEXT_PUBLIC_LOGIN_FRONTEND_PORT || "3001";
   // const url = "http://" + host + ":" + port + "/login";
   // try {
   //   if (!token) {
