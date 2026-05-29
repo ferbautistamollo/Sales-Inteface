@@ -1,21 +1,18 @@
 import "@/utils/globals.css";
-import { Viewport } from "next";
+import { Viewport, Metadata } from "next";
 import clsx from "clsx";
-import { Metadata } from "next";
 
 import { Providers } from "./providers";
 
-import { fontSans } from "@/utils/fonts";
-import { Navbar } from "@/components/header/navbar";
-import { SidebarRoot } from "@/components/header/sidebarRoot";
-import { getUserCookie, getDeployEnvironment } from "@/utils";
+import { Navbar, SidebarRoot } from "@/components/header";
+import { getUserCookie, getDeployEnvironment, fontSans } from "@/utils";
 
 export const metadata: Metadata = {
   title: {
-    default: "Nombre del sitio",
-    template: `%s - nombre del sitio`,
+    default: "Herramienta Tecnológica de Ventas - MUSERPOL",
+    template: `%s - herramienta tecnológica de ventas`,
   },
-  description: "Descripción del sitio",
+  description: "Herramienta para la gestión de ventas de MUSERPOL",
   icons: {
     icon: "/icono_muserpol.svg",
   },
@@ -35,7 +32,7 @@ export default async function Layout({
 }) {
   const { data } = await getUserCookie();
   const environment = getDeployEnvironment();
-  const computerToolName = "TEMPLATE MUSERPOL";
+  const computerToolName = "HERRAMIENTA TECNOLÓGICA DE VENTAS";
 
   return (
     <html suppressHydrationWarning lang="en">
