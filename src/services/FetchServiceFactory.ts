@@ -24,7 +24,7 @@ const factory = new FetchServiceFactory(baseUrl);
 
 export const apiClient = factory.createAPIConnection();
 
-const hostLogin = process.env.NEXT_PUBLIC_SERVER_FRONTEND || "localhost";
-const portLogin = process.env.LOGIN_FRONTEND_PORT || 3001;
+const hostLogin = process.env.NEXT_PUBLIC_FRONTEND_HOST || "localhost";
+const portLogin = process.env.NEXT_PUBLIC_LOGIN_FRONTEND_PORT || 3001;
 
 export const urlLogin = `http://${hostLogin}:${portLogin}`;
