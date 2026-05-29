@@ -36,12 +36,14 @@ export {
   VerticalDotsIcon,
   HomeIcon,
   LogoutIcon,
+  SalesIcon,
+  ArrowRightIcon,
 } from "./icons";
 
-// export { ButtonEdit } from "./buttonEdit";
-// export { ButtonEdition } from "./buttonEdition";
-// export { ButtonRegister } from "./buttonRegister";
-// export { ButtonDelete } from "./buttonDelete";
+export { ButtonEdit } from "./buttonEdit";
+export { ButtonEdition } from "./buttonEdition";
+export { ButtonRegister } from "./buttonRegister";
+export { ButtonDelete } from "./buttonDelete";
 // export { CardActions } from "./cardActions";
 // export { DrawerRecords } from "./drawerRecords";
 // export { EmptyContent } from "./emptyContent";
@@ -50,4 +52,10 @@ export {
 // export { SpinnerLoading } from "./spinnerLoading";
 // export { TableActions } from "./tableActions";
 // export { UserSession } from "./userSession";
-// export { Search } from "./search";
+export { Search } from "./search";
+export { ThemeSwitch } from "./theme-switch";
+export { AlertServer } from "./alertServer";
+export { CopyButton } from "./copyButton";
+export { UserInfo } from "./userInfo";
+export { BreadcrumbsState } from "./breadcrumbsState";
+export { Sidebar } from "./sidebar";
