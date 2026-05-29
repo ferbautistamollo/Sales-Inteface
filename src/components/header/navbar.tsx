@@ -4,11 +4,10 @@ import { Link, Tooltip } from "@heroui/react";
 
 import { UserSession } from "./userSession";
 
-import { ThemeSwitch } from "@/components/theme-switch";
-import { Logo } from "@/components/icons";
+import { ThemeSwitch, Logo, Search } from "@/components";
 import { urlLogin } from "@/services";
 import { User } from "@/utils/interfaces";
-import { logout } from "@/api";
+import { logout, searchPerson } from "@/api";
 
 interface Props {
   user: User;
@@ -52,6 +51,12 @@ export const Navbar = ({ user, environment, computerToolName }: Props) => {
                   : "VERSIÓN DE DESARROLLO"}
               </span>
             )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center text-center leading-tight">
+            <Search searchPerson={searchPerson} />
           </div>
         </div>
 
