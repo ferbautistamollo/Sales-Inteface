@@ -29,6 +29,7 @@ export function Search({ searchPerson }: Props) {
     e.preventDefault();
     if (!hasText) return;
     const response = await searchPerson(String(value), String(selectedTab));
+
     const { error, message, data } = response;
 
     if (error) {

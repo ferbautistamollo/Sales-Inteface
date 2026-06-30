@@ -12,66 +12,59 @@ export interface User {
 }
 
 export interface Person {
-  id: number;
+  id: string;
   uuidColumn?: string;
-  cityBirth: string | null;
-  pensionEntity: PensionEntity | number;
-  financialEntity: FinancialEntity | number;
-  firstName: string;
-  secondName: string | null;
-  lastName: string;
-  mothersLastName: string;
-  surnameHusband: string | null;
+  fullName: string;
   identityCard: string;
-  dueDate: Date | null;
-  isDuedateUndefined: boolean | null;
-  gender: string;
-  civilStatus: string;
-  birthDate: Date | string;
-  dateDeath: Date | null;
-  deathCertificateNumber: string | null;
-  reasonDeath: string | null;
-  phoneNumber: string | null;
-  cellPhoneNumber: string | null;
-  nua: number | null;
-  accountNumber: string | null;
-  sigepStatus: string | null;
-  idPersonalSenasir: number | null;
-  dateLastContribution: Date | string | null; //Eliminar
-  createdAt: Date | string | null;
-  updatedAt: Date | string | null;
-  deletedAt: Date | string | null;
-
-  personAffiliate?: PersonAffiliate[];
+  nup: string | undefined;
+  isPolice: boolean;
 }
 
-export interface FinancialEntity {
+export interface Parameters {
+  id: string;
+  maxProducts: number;
+  maxAmountProduct: number;
+  currencySymbol: string;
+}
+
+export interface PaymentType {
+  id: string;
+  name: string;
+  description: string;
+  shortened: string;
+  component: PaymentComponent;
+}
+
+type PaymentComponent = "cash" | "qr" | "bank" | "bankTransfer";
+
+export interface FinancialEntities {
+  id: string;
+  name: string;
+  code?: string;
+  isActive?: boolean;
+}
+
+export interface Products {
   id: number;
   name: string;
-  serviceStatus: boolean | null;
+  code: string;
+  price: string;
 }
 
-export interface PensionEntity {
-  id: number;
-  type: string;
+export interface SaleProduct extends Omit<Products, "id"> {
+  productId: number;
+  amount: number;
+}
+
+export interface Voucher {
+  customer: string;
+  identityCardCustomer: string;
+  paymentLocationId: string;
+  depositDate: string;
+}
+
+export interface Groups {
+  id: string;
   name: string;
-  isActive: boolean;
-}
-
-export interface PersonAffiliate {
-  typeId: number;
-  kinship: Kinship;
-  state?: boolean;
-}
-
-export interface Kinship {
-  id: number;
-  name: string;
-}
-
-export interface CityBirth {
-  id: number | null;
-  name: string | null;
-  firstShortened: string | null;
-  serviceStatus: boolean | null;
+  description: string;
 }
