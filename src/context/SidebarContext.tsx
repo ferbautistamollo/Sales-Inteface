@@ -1,14 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 interface SidebarContextProps {
-  selectedKey?: string;
+  selectedKey: string;
   setSelectedKey: (key: string) => void;
 }
 
 interface SidebarProviderProps {
-  selectedKey?: string;
+  selectedKey: string;
   children: ReactNode;
 }
 
@@ -19,16 +19,16 @@ const SidebarContext = createContext<SidebarContextProps | undefined>(
 SidebarContext.displayName = "SidebarContext";
 
 export function SidebarProvider({
-  selectedKey = "",
+  selectedKey: initialKey,
   children,
 }: SidebarProviderProps) {
-  const [selectedKeyState, setSelectedKeyState] = useState(selectedKey);
+  const [selectedKey, setSelectedKey] = useState(initialKey);
 
   return (
     <SidebarContext.Provider
       value={{
-        selectedKey: selectedKeyState,
-        setSelectedKey: setSelectedKeyState,
+        selectedKey,
+        setSelectedKey,
       }}
     >
       {children}
