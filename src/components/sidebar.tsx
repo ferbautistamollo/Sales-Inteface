@@ -1,22 +1,31 @@
 "use client";
 
 import { Card, Tabs } from "@heroui/react";
+import { useState } from "react";
+import { useEffect } from "react";
 
-import { useSidebar } from "@/context";
 import { ArrowRightIcon } from "@/components";
 
 interface Props {
   sidebar: {
-    name: string;
     id: string;
+    name: string;
   }[];
+  onChange?: (key: string) => void;
 }
 
-export const Sidebar = ({ sidebar }: Props) => {
-  const { selectedKey, setSelectedKey } = useSidebar();
+export const Sidebar = ({ sidebar, onChange }: Props) => {
+  const [selectedKey, setSelectedKey] = useState(sidebar[0]?.id ?? "");
+
+  useEffect(() => {
+  if (sidebar.length > 0) {
+      onChange?.(sidebar[0].id);
+    }
+  }, []);
 
   const handleTabChange = (key: string) => {
     setSelectedKey(key);
+    onChange?.(key);
   };
 
   return (
@@ -27,7 +36,7 @@ export const Sidebar = ({ sidebar }: Props) => {
           orientation="vertical"
           selectedKey={selectedKey}
           variant="secondary"
-          onSelectionChange={handleTabChange as any}
+          onSelectionChange={(key) => handleTabChange(key as any)}
         >
           <Tabs.ListContainer className="w-full">
             <Tabs.List
@@ -36,6 +45,7 @@ export const Sidebar = ({ sidebar }: Props) => {
               w-full
               uppercase
               *:data-[selected=true]:bg-green-200
+              dark:*:data-[selected=true]:bg-green-900
               *:data-[selected=true]:font-bold
             "
             >
