@@ -4,17 +4,18 @@ import { createContext, useContext, ReactNode } from "react";
 
 import {
   Person,
-  FinancialEntity,
-  PensionEntity,
-  CityBirth,
+  Parameters,
+  PaymentType,
+  FinancialEntities,
+  Groups,
 } from "@/utils/interfaces";
 
 interface SalesContextProps {
   person: Person;
-  affiliateId: string;
-  financialEntity: FinancialEntity;
-  pensionEntity: PensionEntity;
-  cityBirth: CityBirth;
+  parameters: Parameters;
+  paymentTypes: PaymentType[];
+  financialEntities: FinancialEntities[];
+  groups: Groups[];
 }
 
 interface SalesProviderProps extends SalesContextProps {
@@ -27,20 +28,20 @@ SalesContext.displayName = "SalesContext";
 
 export function SalesProvider({
   person,
-  financialEntity,
-  pensionEntity,
-  cityBirth,
-  affiliateId,
+  parameters,
+  paymentTypes,
+  financialEntities,
+  groups,
   children,
 }: SalesProviderProps) {
   return (
     <SalesContext.Provider
       value={{
         person,
-        financialEntity,
-        pensionEntity,
-        cityBirth,
-        affiliateId,
+        parameters,
+        paymentTypes,
+        financialEntities,
+        groups,
       }}
     >
       {children}
