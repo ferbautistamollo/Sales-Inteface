@@ -20,7 +20,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className }) => {
   }, []);
 
   if (!mounted) {
-    return <div className="w-[22px] h-[22px]" />;
+    return <div className="w-5.5 h-5.5" />;
   }
 
   const isLight = resolvedTheme === "light";
