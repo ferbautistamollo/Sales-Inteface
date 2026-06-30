@@ -90,7 +90,7 @@ export function Providers({
 }: ProvidersProps) {
   return (
     <NextThemesProvider {...themeProps}>
-      <Toast.Provider />
+      <Toast.Provider placement="top end" />
       <SidebarProvider initialCollapsed={initialSidebarCollapsed ?? true}>
         {children}
       </SidebarProvider>
