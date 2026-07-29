@@ -18,7 +18,7 @@ export const Sidebar = ({ sidebar, onChange }: Props) => {
   const [selectedKey, setSelectedKey] = useState(sidebar[0]?.id ?? "");
 
   useEffect(() => {
-  if (sidebar.length > 0) {
+    if (sidebar.length > 0) {
       onChange?.(sidebar[0].id);
     }
   }, []);
