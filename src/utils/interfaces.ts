@@ -32,10 +32,7 @@ export interface PaymentType {
   name: string;
   description: string;
   shortened: string;
-  component: PaymentComponent;
 }
-
-type PaymentComponent = "cash" | "qr" | "bank" | "bankTransfer";
 
 export interface FinancialEntities {
   id: string;
@@ -47,24 +44,73 @@ export interface FinancialEntities {
 export interface Products {
   id: number;
   name: string;
-  code: string;
-  price: string;
+  code?: string;
+  price: number;
 }
 
-export interface SaleProduct extends Omit<Products, "id"> {
+export interface SaleProduct {
+  id?: number;
   productId: number;
+  name: string;
+  price: number;
   amount: number;
+  total?: number;
+  saleId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
 }
 
 export interface Voucher {
-  customer: string;
-  identityCardCustomer: string;
-  paymentLocationId: string;
-  depositDate: string;
+  id?: number;
+  saleId?: number;
+  total?: number;
+  identityCardCustomer?: string;
+  paymentLocation?: string;
+  receiptNumber?: string;
+  description?: string;
+  paymentType?: PaymentTypes;
+  customer?: string;
+  depositDate?: string;
+}
+
+export interface PaymentTypes {
+  id: string;
+  name: string;
+  description?: string;
+  shortened?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
 }
 
 export interface Groups {
   id: string;
   name: string;
   description: string;
+}
+
+export interface Sale {
+  id: number;
+  code: string;
+  saleState: string;
+  personId?: number;
+  receptionist?: string;
+  saleProducts: SaleProduct[];
+  voucher: Voucher;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+}
+
+export interface QrPaymentSale {
+  id: number;
+  personId?: number;
+  qrId?: string;
+  qrImagen?: string;
+  qrState?: string;
+  expirationDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  dataResponse?: any;
 }
