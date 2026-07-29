@@ -39,6 +39,8 @@ export {
   SalesIcon,
   ArrowRightIcon,
   ArrowUpLargeIcon,
+  PrintIcon,
+  ReportIcon,
 } from "./icons";
 
 export { ButtonEdit } from "./buttonEdit";
@@ -47,10 +49,10 @@ export { ButtonRegister } from "./buttonRegister";
 export { ButtonDelete } from "./buttonDelete";
 // export { CardActions } from "./cardActions";
 export { DrawerRecords } from "./drawerRecords";
-// export { EmptyContent } from "./emptyContent";
+export { EmptyContent } from "./emptyContent";
 // export { HeaderManage } from "./headerManage";
 export { ModalAlert } from "./modalAlert";
-// export { SpinnerLoading } from "./spinnerLoading";
+export { SpinnerLoading } from "./spinnerLoading";
 // export { TableActions } from "./tableActions";
 // export { UserSession } from "./userSession";
 export { Search } from "./search";
@@ -62,3 +64,6 @@ export { BreadcrumbsState } from "./breadcrumbsState";
 export { Sidebar } from "./sidebar";
 export { ButtonCard } from "./buttonCard";
 export { PaymentType } from "./paymentType";
+export { ButtonPrint } from "./buttonPrint";
+export { ButtonCancel } from "./buttonCancel";
+export { ViewerQr } from "./viewerQr";
