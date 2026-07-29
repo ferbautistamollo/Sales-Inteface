@@ -2,7 +2,7 @@
 
 import { Table, Tabs } from "@heroui/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Input, Button, Separator, Label, toast, Card } from "@heroui/react";
 import clsx from "clsx";
 import { ProgressCircle } from "@heroui/react";
@@ -18,21 +18,21 @@ import {
 import { useSales } from "@/context";
 import { getGroupProducts, postCreateSale, postGenerateQr } from "@/api";
 import { Products, Voucher, SaleProduct } from "@/utils/interfaces";
+import { getUserCookie } from "@/utils";
 
 const columns = [
   { id: "actions", name: "Acciones" },
   { id: "name", name: "Nombre" },
-  { id: "code", name: "Código" },
   { id: "price", name: "Precio" },
   { id: "amount", name: "Cantidad" },
   { id: "subtotal", name: "Sub Total" },
 ];
 
 export default function Page() {
+  const { uuid } = useParams();
   const router = useRouter();
-  const { parameters, paymentTypes, person, financialEntities, groups } =
-    useSales();
-  const [loading, setLoading] = useState(false);
+  const { parameters, paymentTypes, person, groups } = useSales();
+  const [, setLoading] = useState(false);
   const [loadingQr, setLoadingQr] = useState(false);
 
   const [allProducts, setAllProducts] = useState<Products[]>([]);
@@ -52,8 +52,10 @@ export default function Page() {
   const [voucher, setVoucher] = useState<Voucher>({
     customer: "",
     identityCardCustomer: "",
-    paymentLocationId: financialEntities[0].id,
+    paymentLocation: "MUTUAL DE SERVICIOS AL POLICÍA",
     depositDate: new Date().toISOString(),
+    receiptNumber: "",
+    description: "",
   });
 
   const getProducts = async (Key: string) => {
@@ -99,12 +101,14 @@ export default function Page() {
   const createSale = async () => {
     try {
       setLoading(true);
+      const { data } = await getUserCookie();
       const body = {
-        personUuid: person.uuidColumn,
+        personId: person.id,
         parameterId: parameters.id,
         paymentTypeId: paymentTypeId,
         saleProducts: saleProducts,
         voucher: voucher,
+        receptionist: data.username,
       };
       const { error, message } = await postCreateSale(body);
 
@@ -114,11 +118,13 @@ export default function Page() {
         return;
       }
       toast.success(message);
-      router.push(`/sales`);
+      router.push(`${uuid}/sales`);
 
       return;
-    } catch (error) {
-      toast.danger("Error al crear la venta");
+    } catch (error: any) {
+      toast.danger("Error al crear la venta", {
+        description: error.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -127,12 +133,30 @@ export default function Page() {
   const validateData = () => {
     const hasProducts = saleProducts.length > 0;
     const hasPaymentType = paymentTypeId !== "";
-    let isVoucherValid = true;
 
-    if (!(paymentType === "QR")) {
-      isVoucherValid = Object.values(voucher).every(
-        (value) => String(value).trim() !== "",
-      );
+    let isVoucherValid = false;
+
+    if (paymentType === "DEP") {
+      isVoucherValid = [
+        voucher.customer,
+        voucher.identityCardCustomer,
+        voucher.paymentLocation,
+        voucher.depositDate,
+        voucher.receiptNumber,
+      ].every((value) => String(value).trim() !== "");
+    }
+
+    if (paymentType === "EF") {
+      isVoucherValid = [
+        voucher.customer,
+        voucher.identityCardCustomer,
+        voucher.paymentLocation,
+        voucher.depositDate,
+      ].every((value) => String(value).trim() !== "");
+    }
+
+    if (paymentType === "QR") {
+      isVoucherValid = true;
     }
 
     setProductError(!hasProducts);
@@ -158,8 +182,15 @@ export default function Page() {
     setVoucher({
       customer: "",
       identityCardCustomer: "",
-      paymentLocationId: financialEntities[0].id,
+      paymentLocation:
+        type.shortened === "EF"
+          ? "MUTUAL DE SERVICIOS AL POLICÍA"
+          : type.shortened === "DEP"
+            ? "BANCO UNIÓN S.A."
+            : "",
       depositDate: new Date().toISOString(),
+      receiptNumber: "",
+      description: "",
     });
 
     setPaymentTypeId(type.id);
@@ -169,12 +200,15 @@ export default function Page() {
   const generateQr = async () => {
     try {
       setLoadingQr(true);
+      const { data: userCookie } = await getUserCookie();
+
       if (!validateData()) return;
       const body = {
-        personUuid: person.uuidColumn,
+        personId: person.id,
         parameterId: parameters.id,
         paymentTypeId: paymentTypeId,
         saleProducts: saleProducts,
+        receptionist: userCookie.username,
       };
       const { error, message, data } = await postGenerateQr(body);
 
@@ -192,25 +226,10 @@ export default function Page() {
       });
 
       return;
-    } catch (error) {
-      toast.danger("Error al generar el Qr");
-    } finally {
-      setLoadingQr(false);
-    }
-  };
-
-  const cancelPaymentQr = async () => {
-    try {
-      setLoadingQr(true);
-      toast.info("QR cancelado", {
-        description: "Se habilito la edición de la venta",
+    } catch (error: any) {
+      toast.danger("Error al generar el Qr", {
+        description: error.message,
       });
-      setImagenQr("");
-      setIsGenerateQr(false);
-
-      return;
-    } catch (error) {
-      toast.danger("Error al cancelar el pago por QR");
     } finally {
       setLoadingQr(false);
     }
@@ -295,7 +314,6 @@ export default function Page() {
                                 />
                               </Table.Cell>
                               <Table.Cell>{product.name}</Table.Cell>
-                              <Table.Cell>{product.code}</Table.Cell>
                               <Table.Cell>{product.price}</Table.Cell>
                               <Table.Cell>
                                 <Input
@@ -362,72 +380,85 @@ export default function Page() {
                   </p>
                 </div>
               )}
+              {saleProducts.length > 0 && (
+                <>
+                  <Label className="mb-2 text-xl font-bold">
+                    Seleccione tipo de pago:
+                  </Label>
 
-              <Label className="mb-2 text-xl font-bold">
-                Seleccione tipo de pago:
-              </Label>
-
-              <div className="flex flex-1 flex-col">
-                <Tabs
-                  className="w-full h-full"
-                  isDisabled={isGenerateQr}
-                  variant="secondary"
-                  onSelectionChange={(key) => handleTabChange(String(key))}
-                >
-                  <Tabs.ListContainer>
-                    <Tabs.List aria-label="Options" className="uppercase">
-                      {paymentTypes.map((type, index) => (
-                        <Tabs.Tab key={index} id={type.id}>
-                          {type.name}
-                          <Tabs.Indicator />
-                        </Tabs.Tab>
-                      ))}
-                    </Tabs.List>
-                  </Tabs.ListContainer>
-                  {loadingQr ? (
-                    <ProgressCircle
-                      isIndeterminate
-                      aria-label="Loading"
-                      size="lg"
-                      value={160}
+                  <div className="flex flex-1 flex-col">
+                    <Tabs
+                      className="w-full h-full"
+                      isDisabled={isGenerateQr}
+                      variant="secondary"
+                      onSelectionChange={(key) => handleTabChange(String(key))}
                     >
-                      <ProgressCircle.Track>
-                        <ProgressCircle.TrackCircle />
-                        <ProgressCircle.FillCircle />
-                      </ProgressCircle.Track>
-                    </ProgressCircle>
-                  ) : (
-                    <PaymentType
-                      cancelPaymentQr={cancelPaymentQr}
-                      financialEntities={financialEntities}
-                      generateQr={generateQr}
-                      imagenQr={imagenQr}
-                      isGenerateQr={isGenerateQr}
-                      paymentType={paymentType}
-                      setVoucher={setVoucher}
-                      voucher={voucher}
-                    />
-                  )}
-                </Tabs>
-              </div>
+                      <Tabs.ListContainer>
+                        <Tabs.List aria-label="Options" className="uppercase">
+                          {paymentTypes.map((type, index) => (
+                            <Tabs.Tab key={index} id={type.id}>
+                              {type.name}
+                              <Tabs.Indicator />
+                            </Tabs.Tab>
+                          ))}
+                        </Tabs.List>
+                      </Tabs.ListContainer>
+                      {loadingQr ? (
+                        <ProgressCircle
+                          isIndeterminate
+                          aria-label="Loading"
+                          size="lg"
+                          value={160}
+                        >
+                          <ProgressCircle.Track>
+                            <ProgressCircle.TrackCircle />
+                            <ProgressCircle.FillCircle />
+                          </ProgressCircle.Track>
+                        </ProgressCircle>
+                      ) : (
+                        <PaymentType
+                          generateQr={generateQr}
+                          imagenQr={imagenQr}
+                          isGenerateQr={isGenerateQr}
+                          paymentType={paymentType}
+                          setVoucher={setVoucher}
+                          voucher={voucher}
+                        />
+                      )}
+                    </Tabs>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="flex h-1/5 flex-col  justify-end">
               <div className="flex justify-between pt-4">
-                <Button
-                  aria-label="Menu"
-                  className="w-2/5 h-full text-xl font-bold"
-                  isDisabled={isGenerateQr}
-                  size="lg"
-                  variant="secondary"
-                  onPress={() => {
-                    if (!validateData()) return;
-                    setOpenModalAlert(true);
-                  }}
-                >
-                  FINALIZAR VENTA
-                </Button>
-
+                {isGenerateQr ? (
+                  <Button
+                    aria-label="Menu"
+                    className="w-2/5 h-full text-xl font-bold"
+                    size="lg"
+                    variant="primary"
+                    onPress={() => router.push(`/${uuid}/sales`)}
+                  >
+                    VER REGISTROS
+                  </Button>
+                ) : paymentType !== "QR" ? (
+                  <Button
+                    aria-label="Menu"
+                    className="w-2/5 h-full text-xl font-bold"
+                    size="lg"
+                    variant="secondary"
+                    onPress={() => {
+                      if (!validateData()) return;
+                      setOpenModalAlert(true);
+                    }}
+                  >
+                    FINALIZAR VENTA
+                  </Button>
+                ) : (
+                  <div className="w-2/5"> </div>
+                )}
                 <div className="flex h-3/8 text-5xl font-semibold capitalize">
                   Total &nbsp;
                   {parameters.currencySymbol}.
