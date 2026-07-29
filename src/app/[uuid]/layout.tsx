@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 import { getForCreatingSale } from "@/api";
-import { AlertServer } from "@/components";
+import { AlertServer, BreadcrumbsState } from "@/components";
 import { Options } from "@/components/sales/options";
 import { SalesProvider } from "@/context";
 
@@ -32,7 +32,9 @@ export default async function Layout({ children, params }: ProfileLayoutProps) {
         person={person}
       >
         <div className="flex justify-between items-center pb-2 w-full">
-          <div>{/* <BreadcrumbsState /> */}</div>
+          <div>
+            <BreadcrumbsState />
+          </div>
           <Options />
         </div>
         <section className="flex justify-center md:flex-row flex-wrap gap-1 h-[calc(100vh-135px)]">

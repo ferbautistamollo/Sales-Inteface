@@ -8,4 +8,6 @@ export {
   postGenerateQr,
   getSalesRecords,
   getPersonSales,
+  getQrPending,
+  getQrImage,
 } from "./sales";

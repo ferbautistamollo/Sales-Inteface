@@ -3,7 +3,12 @@
 import { Button, Tooltip } from "@heroui/react";
 import { useRouter, usePathname } from "next/navigation";
 
-import { CollapseTrueIcon, CollapseFalseIcon, SalesIcon } from "@/components";
+import {
+  CollapseTrueIcon,
+  CollapseFalseIcon,
+  HomeIcon,
+  ReportIcon,
+} from "@/components";
 import { useSidebar } from "@/app/providers";
 
 export const SidebarRoot = () => {
@@ -11,8 +16,10 @@ export const SidebarRoot = () => {
   const CollapseIcon = collapsed ? CollapseFalseIcon : CollapseTrueIcon;
   const router = useRouter();
   const pathname = usePathname();
-
-  const menuItems = [{ label: "Ventas", href: "/sales", icon: SalesIcon }];
+  const menuItems = [
+    { label: "Inicio", href: "/", icon: HomeIcon },
+    { label: "Reportes", href: "/reports", icon: ReportIcon },
+  ];
 
   return (
     <aside

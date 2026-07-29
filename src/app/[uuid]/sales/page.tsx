@@ -1,60 +1,156 @@
 "use client";
 
-import { Button, Card, CloseButton } from "@heroui/react";
+import Image from "next/image";
+import { Card, toast } from "@heroui/react";
+import { useState } from "react";
+import { useEffect } from "react";
 
 import { useSales } from "@/context";
-import { useState } from "react";
 import { getPersonSales } from "@/api";
-import { Products } from "@/utils/interfaces";
-
+import { Sale } from "@/utils/interfaces";
+import { EmptyContent, ButtonCancel, ButtonPrint } from "@/components";
+import { apiClient } from "@/services";
 
 export default function Page() {
   const { person } = useSales();
-  const [allProducts, setAllProducts] = useState<Products[]>([]);
-  const [loading, setLoading] = useState(false);
-  // const sidebar = [{ id: "1", name: "Productos" }];
+  const [personSales, setPersonSales] = useState<Sale[]>([]);
+  const [, setLoading] = useState(false);
 
-
-  const getSales = async (Key: string) => {
+  const getSales = async (key: string) => {
     try {
       setLoading(true);
+      const { error, message, data } = await getPersonSales(key);
 
-      const { error, data } = await getPersonSales(Key);
+      if (error) {
+        toast.danger(message);
 
-      if (error) return;
-      setAllProducts(data);
+        return;
+      }
+      setPersonSales(data);
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePrint = async (saleId: string) => {
+    try {
+      const response = await apiClient.GET(
+        `sales/voucherPdf/${saleId}?template=reciboPrueba`,
+      );
+
+      if (!response.ok) {
+        toast.danger("No se pudo generar el PDF");
+
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const iframe = document.createElement("iframe");
+
+      iframe.style.position = "fixed";
+      iframe.style.width = "1px";
+      iframe.style.height = "1px";
+      iframe.style.opacity = "0";
+      iframe.style.pointerEvents = "none";
+      iframe.src = url;
+
+      iframe.onload = () => {
+        const win = iframe.contentWindow;
+
+        if (!win) return;
+
+        win.focus();
+
+        // Espera un poco para que el visor PDF termine de cargar
+        setTimeout(() => {
+          win.print();
+        }, 500);
+      };
+
+      document.body.appendChild(iframe);
+    } catch {
+      toast.danger("Error al imprimir el PDF");
+    }
+  };
+
+  const handleCancel = async () => {
+    alert("cancelar venta");
+  };
+
+  useEffect(() => {
+    getSales(person.id);
+  }, []);
+
   return (
-      <Card className="w-full items-stretch md:flex-row border-2">
-        <div className="relative h-35 w-full shrink-0 overflow-hidden rounded-2xl sm:h-30 sm:w-30">
-          <img
-            alt="Cherries"
-            className="pointer-events-none absolute inset-0 h-full w-full scale-75 object-cover select-none"
-            loading="lazy"
-            src="/sales.svg"
-          />
-        </div>
-        <div className="flex flex-1 flex-col gap-3">
-          <Card.Header className="gap-1">
-            <Card.Title className="pr-8">Become an ACME Creator!</Card.Title>
-            <Card.Description>
-              Lorem ipsum dolor sit amet consectetur. Sed arcu donec id aliquam dolor sed amet
-              faucibus etiam.
-            </Card.Description>
-            <CloseButton aria-label="Close banner" className="absolute top-3 right-3" />
-          </Card.Header>
-          <Card.Footer className="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground">Only 10 spots</span>
-              <span className="text-xs text-muted">Submission ends Oct 10.</span>
-            </div>
-            <Button className="w-full sm:w-auto">Apply Now</Button>
-          </Card.Footer>
-        </div>
-      </Card>
+    <>
+      {personSales.length === 0 ? (
+        <EmptyContent />
+      ) : (
+        <>
+          {personSales.map((sale) => (
+            <Card
+              key={sale.id}
+              className="w-full items-stretch md:flex-row border-2"
+            >
+              <div className="relative h-35 w-full shrink-0 overflow-hidden rounded-2xl sm:h-50 sm:w-50 text-center">
+                <Image
+                  alt="receipt"
+                  className="h-full w-full object-cover"
+                  height={0}
+                  sizes="100vw"
+                  src="/receipt.svg"
+                  width={0}
+                />
+              </div>
+              <div className="flex flex-1 flex-col gap-3">
+                <Card.Header className="gap-1">
+                  <Card.Title className="pr-8" />
+                  <Card.Description className="font-bold text-blue-800">
+                    COD: {sale.code}
+                    &nbsp; - &nbsp; ESTADO: {sale.saleState}
+                  </Card.Description>
+                </Card.Header>
+                <Card.Content className="flex flex-col gap-2 overflow-y-auto">
+                  {sale.saleProducts.map((product) => (
+                    <div key={product.id} className="flex flex-col gap-1">
+                      <span className="text-md font-bold text-foreground">
+                        {product.amount} {product.name}
+                      </span>
+                    </div>
+                  ))}
+                  <span className="font-bold">
+                    Total:{sale.voucher.total} Bs{" "}
+                  </span>
+
+                  <span>Depositante: {sale.voucher.customer}</span>
+                  <span>
+                    CI Depositante: {sale.voucher.identityCardCustomer}
+                  </span>
+                </Card.Content>
+                <Card.Footer className="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-foreground">
+                      Recepcionado por: {sale.receptionist}
+                    </span>
+                    <span className="text-xs text-muted">
+                      Fecha de recepción: {sale.createdAt}
+                    </span>
+                  </div>
+                  <div className="flex w-full flex-col gap-2 sm:flex-row sm:w-auto">
+                    <ButtonPrint
+                      isIconOnly
+                      onPress={() => handlePrint(String(sale.id))}
+                    />
+                    <ButtonCancel isIconOnly onPress={handleCancel} />
+                  </div>
+                </Card.Footer>
+              </div>
+            </Card>
+          ))}
+        </>
+      )}
+    </>
   );
 }

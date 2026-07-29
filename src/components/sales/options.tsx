@@ -18,6 +18,7 @@ export const Options = () => {
 
     if (error) {
       toast.danger(message);
+
       return;
     }
     setDataRecords(data);
@@ -33,7 +34,11 @@ export const Options = () => {
         >
           Ver registros
         </Button>
-        <Button className="border-2" variant="outline" onClick={handlePress}>
+        <Button
+          className="border-2"
+          variant="outline"
+          onClick={() => router.push(`/${uuid}/pending`)}
+        >
           Ver pendientes
         </Button>
         <DrawerRecords data={dataRecords} getData={handlePress} />

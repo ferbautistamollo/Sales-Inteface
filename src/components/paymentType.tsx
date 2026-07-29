@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Autocomplete,
-  Button,
-  EmptyState,
-  Input,
-  Label,
-  ListBox,
-  SearchField,
-  Surface,
-  useFilter,
-} from "@heroui/react";
+import { Button, Input, Label, Surface, TextArea } from "@heroui/react";
 import Image from "next/image";
 
 import { Voucher } from "@/utils/interfaces";
@@ -20,11 +10,6 @@ interface Props {
   isGenerateQr?: boolean;
   imagenQr?: string;
   generateQr?: () => void;
-  cancelPaymentQr?: () => void;
-  financialEntities?: {
-    id: string;
-    name: string;
-  }[];
   voucher: Voucher;
   setVoucher: (voucher: Voucher) => void;
 }
@@ -34,13 +19,9 @@ export const PaymentType = ({
   isGenerateQr = false,
   imagenQr,
   generateQr,
-  cancelPaymentQr,
-  financialEntities = [],
   voucher,
   setVoucher,
 }: Props) => {
-  const { contains } = useFilter({ sensitivity: "base" });
-
   return (
     <>
       {paymentType !== "QR" ? (
@@ -53,7 +34,10 @@ export const PaymentType = ({
               value={voucher.customer}
               variant="secondary"
               onChange={(e) =>
-                setVoucher({ ...voucher, customer: e.target.value })
+                setVoucher({
+                  ...voucher,
+                  customer: e.target.value.toUpperCase(),
+                })
               }
             />
           </Surface>
@@ -72,70 +56,57 @@ export const PaymentType = ({
             />
           </Surface>
 
-          <Surface className="flex w-full items-center justify-center rounded-xl bg-surface">
-            <Label className="w-1/4">Fecha del depósito</Label>
-            <Input
-              className="w-3/4"
-              defaultValue={new Date().toISOString().split("T")[0]}
-              disabled={paymentType === "cash" ? true : false}
-              type="date"
-              variant="secondary"
-              onChange={(e) =>
-                setVoucher({ ...voucher, depositDate: e.target.value })
-              }
-            />
-          </Surface>
+          {paymentType == "DEP" && (
+            <>
+              <Surface className="flex w-full items-center justify-center rounded-xl bg-surface">
+                <Label className="w-1/4">Fecha del depósito</Label>
+                <Input
+                  className="w-3/4"
+                  defaultValue={new Date().toISOString().split("T")[0]}
+                  type="date"
+                  variant="secondary"
+                  onChange={(e) =>
+                    setVoucher({ ...voucher, depositDate: e.target.value })
+                  }
+                />
+              </Surface>
+
+              <Surface className="flex w-full items-center justify-center rounded-xl bg-surface">
+                <Label className="w-1/4">Ubicación del depósito</Label>
+                <Input
+                  aria-label="Ubicación del depósito"
+                  className="w-3/4 flex"
+                  value={voucher.paymentLocation}
+                  variant="secondary"
+                  onChange={(e) =>
+                    setVoucher({ ...voucher, paymentLocation: e.target.value })
+                  }
+                />
+              </Surface>
+              <Surface className="flex w-full items-center justify-center rounded-xl bg-surface">
+                <Label className="w-1/4">Número de comprobante</Label>
+                <Input
+                  aria-label="Numero del comprobante"
+                  className="w-3/4 flex"
+                  variant="secondary"
+                  onChange={(e) =>
+                    setVoucher({ ...voucher, receiptNumber: e.target.value })
+                  }
+                />
+              </Surface>
+            </>
+          )}
 
           <Surface className="flex w-full items-center justify-center rounded-xl bg-surface">
-            <Label className="w-1/4">Ubicación del depósito</Label>
-            <Autocomplete
-              aria-label="Ubicación del depósito"
+            <Label className="w-1/4">Descripción (opcional)</Label>
+            <TextArea
+              aria-label="Descripción"
               className="w-3/4 flex"
-              isDisabled={paymentType === "cash" ? true : false}
-              placeholder="Entidad financiera"
-              selectionMode="single"
-              value={String(voucher.paymentLocationId)}
-              onChange={(value) =>
-                setVoucher({ ...voucher, paymentLocationId: String(value) })
+              placeholder="Descripción del depósito"
+              onChange={(e) =>
+                setVoucher({ ...voucher, description: e.target.value })
               }
-            >
-              <Autocomplete.Trigger>
-                <Autocomplete.Value />
-                <Autocomplete.ClearButton />
-                <Autocomplete.Indicator />
-              </Autocomplete.Trigger>
-              <Autocomplete.Popover>
-                <Autocomplete.Filter filter={contains}>
-                  <SearchField
-                    aria-label="Buscar entidad bancaria"
-                    name="search"
-                    variant="secondary"
-                  >
-                    <SearchField.Group aria-label="Search">
-                      <SearchField.SearchIcon aria-label="Search icon" />
-                      <SearchField.Input placeholder="Search states..." />
-                      <SearchField.ClearButton />
-                    </SearchField.Group>
-                  </SearchField>
-                  <ListBox
-                    renderEmptyState={() => (
-                      <EmptyState>No results found</EmptyState>
-                    )}
-                  >
-                    {financialEntities.map((item) => (
-                      <ListBox.Item
-                        key={String(item.id)}
-                        id={String(item.id)}
-                        textValue={item.name}
-                      >
-                        {item.name}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Autocomplete.Filter>
-              </Autocomplete.Popover>
-            </Autocomplete>
+            />
           </Surface>
         </div>
       ) : (
@@ -144,10 +115,58 @@ export const PaymentType = ({
             <>
               <Button
                 className="w-full"
-                variant="danger-soft"
-                onPress={cancelPaymentQr}
+                variant="secondary"
+                onPress={() => {
+                  const link = document.createElement("a");
+
+                  link.href = `data:image/png;base64,${imagenQr}`;
+                  link.download = "qr_payment.png";
+                  link.click();
+                }}
               >
-                CANCELAR PAGO POR QR
+                DESCARGAR QR
+              </Button>
+              <Button
+                className="w-full"
+                variant="secondary"
+                onPress={() => {
+                  const popup = window.open(
+                    "",
+                    "qrWindow",
+                    "width=500,height=600,left=200,top=100,resizable=yes,scrollbars=no",
+                  );
+
+                  if (popup) {
+                    popup.document.write(`
+                      <!DOCTYPE html>
+                      <html>
+                        <head>
+                          <title>Código QR</title>
+                          <style>
+                            body{
+                              margin:0;
+                              display:flex;
+                              justify-content:center;
+                              align-items:center;
+                              height:100vh;
+                              background:#f5f5f5;
+                            }
+                            img{
+                              max-width:90%;
+                              max-height:90%;
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <img src="data:image/png;base64,${imagenQr}" alt="QR" />
+                        </body>
+                      </html>
+                    `);
+                    popup.document.close();
+                  }
+                }}
+              >
+                VISUALIZAR QR
               </Button>
               <div className="flex items-center justify-center">
                 <Image
