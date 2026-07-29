@@ -1,17 +1,12 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { Button, Card, CloseButton } from "@heroui/react";
-import { useSales } from "@/context";
+import { Card } from "@heroui/react";
 
+import { useSales } from "@/context";
 import { UserInfo } from "@/components";
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-
+export default function Layout({ children }: { children: React.ReactNode }) {
   const { person } = useSales();
 
   return (
@@ -27,14 +22,11 @@ export default function Layout({
               state: true,
             }}
           />
-          {/* <div className="flex gap-1 flex-1 min-h-0">
-            <Sidebar sidebar={sidebar} />
-          </div> */}
         </div>
       </div>
-      <Card className="card-no-outline flex-1 border-2 p-3 min-w-162.5 h-full">
+      <Card className="card-no-outline flex-1 border-2 p-3 min-w-162.5 h-full overflow-y-auto">
         {children}
       </Card>
     </>
-  )
+  );
 }
